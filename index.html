@@ -112,27 +112,37 @@ async function loadTopRatedGames() {
 }
 
 
-    function displayGames(games, containerId) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
+function displayGames(games, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
 
-      games.forEach(game => {
-        const gameDiv = document.createElement('div');
-        gameDiv.className = 'game';
-        gameDiv.innerHTML = `
-          <img src="${game.background_image || ''}" alt="${game.name}">
-          <div class="game-info">
-            <h3>${game.name}</h3>
-            <p><strong>Rating:</strong> ${game.rating} ⭐</p>
-            <p><strong>Genres:</strong> ${game.genres.map(g => g.name).join(', ')}</p>
-            <p><strong>Released:</strong> ${game.released}</p>
-            <p><strong>Added by:</strong> ${game.added.toLocaleString()} users</p>
-            <button class="library-button" onclick='addToLibrary(${JSON.stringify(game)})'>Add to Library</button>
-          </div>
-        `;
-        container.appendChild(gameDiv);
-      });
-    }
+  const forbiddenWords = ['nudity', 'sexual', 'sex', 'adult', 'erotic', 'pregnation', 'winter'];
+
+  games.forEach(game => {
+    const title = game.name.toLowerCase();
+    const description = game.description_raw?.toLowerCase() || '';
+    const combinedText = title + ' ' + description;
+
+    const containsForbiddenWord = forbiddenWords.some(word => combinedText.includes(word));
+    if (containsForbiddenWord) return; // Skip game
+
+    const gameDiv = document.createElement('div');
+    gameDiv.className = 'game';
+    gameDiv.innerHTML = `
+      <img src="${game.background_image || ''}" alt="${game.name}">
+      <div class="game-info">
+        <h3>${game.name}</h3>
+        <p><strong>Rating:</strong> ${game.rating} ⭐</p>
+        <p><strong>Genres:</strong> ${game.genres.map(g => g.name).join(', ')}</p>
+        <p><strong>Released:</strong> ${game.released}</p>
+        <p><strong>Added by:</strong> ${game.added.toLocaleString()} users</p>
+        <button class="library-button" onclick='addToLibrary(${JSON.stringify(game)})'>Add to Library</button>
+      </div>
+    `;
+    container.appendChild(gameDiv);
+  });
+}
+
 
     function addToLibrary(game) {
       let library = JSON.parse(localStorage.getItem('gameLibrary')) || [];
